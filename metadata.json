@@ -1,0 +1,6 @@
+{
+  "name": "Berry Dashboard",
+  "description": "Modern Berry Admin Dashboard recreation with modular React architecture, React Router, sidebar, header, analytics cards, stacked bar charts, and data management tables.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
