@@ -12,23 +12,23 @@ export interface AuthService {
   signOut(): Promise<void>;
 }
 
-/**
- * Demo credentials used strictly when no authentication backend URL
- * (VITE_AUTH_API_URL) is configured.
- */
-export const DEMO_ACCOUNT = {
-  email: 'admin@shopco.com',
-  password: 'ShopCo2026',
-  user: {
-    id: 'demo-admin-1',
-    name: 'ShopCo Admin',
-    email: 'admin@shopco.com',
-    role: 'Administrator',
-  },
-} as const;
-
 const env = (import.meta as ImportMeta & { env?: Record<string, string | undefined> }).env;
 const API_BASE_URL = env?.VITE_AUTH_API_URL?.trim();
+
+function formatDisplayNameFromEmail(email: string): string {
+  const localPart = email.split('@')[0] || 'User';
+  const words = localPart
+    .replace(/[._-]+/g, ' ')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+
+  if (words.length === 0) return 'ShopCo User';
+
+  return words
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+}
 
 /**
  * Future-ready HTTP authentication adapter.
@@ -119,29 +119,35 @@ class ApiAuthService implements AuthService {
 }
 
 /**
- * Client-side demo authentication adapter.
- * Clearly separated from real backend authentication.
+ * Temporary frontend-only authentication adapter for development and testing
+ * while no backend authentication server is connected.
+ * Accepts any valid email address and any non-empty password.
  */
 class DemoAuthService implements AuthService {
   readonly isDemoMode = true;
 
   async signIn(credentials: SignInCredentials): Promise<AuthResult> {
-    await new Promise((resolve) => setTimeout(resolve, 650));
+    await new Promise((resolve) => setTimeout(resolve, 550));
 
-    const normalizedEmail = credentials.email.trim().toLowerCase();
-    const isValidEmail = normalizedEmail === DEMO_ACCOUNT.email.toLowerCase();
-    const isValidPassword = credentials.password === DEMO_ACCOUNT.password;
+    const trimmedEmail = credentials.email.trim();
+    const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail);
+    const hasPassword = credentials.password.length > 0;
 
-    if (!isValidEmail || !isValidPassword) {
+    if (!isEmailValid || !hasPassword) {
       return {
         success: false,
-        error: 'Invalid email or password. Please check your credentials and try again.',
+        error: 'Please enter a valid email address and password.',
       };
     }
 
     const session: AuthSession = {
-      user: { ...DEMO_ACCOUNT.user },
-      token: `demo-session-${Date.now()}`,
+      user: {
+        id: `temp-user-${Date.now()}`,
+        name: formatDisplayNameFromEmail(trimmedEmail),
+        email: trimmedEmail,
+        role: 'Administrator',
+      },
+      token: `temp-session-${Date.now()}`,
       rememberMe: credentials.rememberMe,
       isDemo: true,
       authenticatedAt: new Date().toISOString(),
@@ -151,11 +157,11 @@ class DemoAuthService implements AuthService {
   }
 
   async requestPasswordReset(email: string): Promise<PasswordResetResult> {
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 450));
 
     return {
       success: true,
-      message: `Demo preview: no email was actually sent, but a reset request for ${email.trim()} was simulated.`,
+      message: `If an account matches ${email.trim()}, password reset instructions have been sent.`,
     };
   }
 

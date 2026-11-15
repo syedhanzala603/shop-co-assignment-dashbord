@@ -11,10 +11,8 @@ import {
   ArrowRight,
   ArrowLeft,
   Loader2,
-  Info,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { DEMO_ACCOUNT } from '../services/authService';
 
 interface FormErrors {
   email?: string;
@@ -26,7 +24,7 @@ export const SignInPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const shouldReduceMotion = useReducedMotion();
-  const { signIn, requestPasswordReset, rememberedEmail, isDemoMode } = useAuth();
+  const { signIn, requestPasswordReset, rememberedEmail } = useAuth();
 
   const fromState = (location.state as { from?: { pathname?: string; search?: string } } | null)?.from;
   const redirectPath =
@@ -71,9 +69,6 @@ export const SignInPage: React.FC = () => {
   const validatePassword = (value: string): string | undefined => {
     if (!value) {
       return 'Please enter your password.';
-    }
-    if (value.length < 6) {
-      return 'Password must be at least 6 characters long.';
     }
     return undefined;
   };
@@ -140,13 +135,6 @@ export const SignInPage: React.FC = () => {
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const handleFillDemoCredentials = () => {
-    setEmail(DEMO_ACCOUNT.email);
-    setPassword(DEMO_ACCOUNT.password);
-    setErrors({});
-    setTouched({ email: true, password: true });
   };
 
   const handleOpenForgot = (e: React.MouseEvent) => {
@@ -414,37 +402,6 @@ export const SignInPage: React.FC = () => {
                     )}
                   </button>
                 </form>
-
-                {/* Clearly separated client-side demo helper when no backend API is configured */}
-                {isDemoMode && (
-                  <div className="mt-6 pt-5 border-t border-slate-100">
-                    <div className="rounded-xl bg-slate-50 border border-slate-200/80 p-3.5 space-y-2">
-                      <div className="flex items-start gap-2 text-xs text-slate-600">
-                        <Info className="w-4 h-4 text-[#5e35b1] shrink-0 mt-0.5" aria-hidden="true" />
-                        <div className="space-y-1">
-                          <p className="font-semibold text-slate-800">
-                            Demo Authentication Mode
-                          </p>
-                          <p className="text-[11px] text-slate-500 leading-relaxed">
-                            No backend server is connected yet. Use{' '}
-                            <span className="font-mono text-slate-700">{DEMO_ACCOUNT.email}</span>{' '}
-                            and password{' '}
-                            <span className="font-mono text-slate-700">{DEMO_ACCOUNT.password}</span>{' '}
-                            to test sign-in, or enter other credentials to preview validation.
-                          </p>
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={handleFillDemoCredentials}
-                        disabled={isSubmitting}
-                        className="w-full py-1.5 px-3 rounded-lg bg-[#ede7f6] hover:bg-[#d1c4e9]/70 text-[#5e35b1] text-xs font-semibold transition-colors cursor-pointer disabled:opacity-60"
-                      >
-                        Fill Demo Credentials
-                      </button>
-                    </div>
-                  </div>
-                )}
               </>
             ) : (
               <div className="space-y-5">
