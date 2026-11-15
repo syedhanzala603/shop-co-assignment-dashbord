@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   BarChart2,
@@ -40,8 +40,10 @@ import {
   ChevronDown,
   X,
   Eye,
+  LogOut,
 } from 'lucide-react';
 import { ThemeConfig } from '../../types';
+import { useAuth } from '../../context/AuthContext';
 
 interface SidebarProps {
   themeConfig: ThemeConfig;
@@ -55,12 +57,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onCloseMobile,
 }) => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { signOut } = useAuth();
   const isCollapsed = themeConfig.navCollapsed;
 
   // Submenu toggle states
   const [isCustomerOpen, setIsCustomerOpen] = useState(true);
   const [isOrderOpen, setIsOrderOpen] = useState(true);
   const [isEcommerceOpen, setIsEcommerceOpen] = useState(true);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
+
+  const handleLogout = async () => {
+    if (onCloseMobile) onCloseMobile();
+    await signOut();
+    navigate('/sign-in', { replace: true });
+  };
 
   // Auto-expand submenus if user navigates to their routes
   useEffect(() => {
@@ -547,12 +558,35 @@ export const Sidebar: React.FC<SidebarProps> = ({
           Pages
         </p>
         <div className="space-y-0.5 pt-1">
-          <div className="w-full flex items-center justify-between px-3 py-2 text-xs font-medium text-slate-600 rounded-xl hover:bg-slate-50 cursor-pointer">
-            <div className="flex items-center gap-3">
-              <Lock className="w-4 h-4" />
-              <span>Authentication</span>
-            </div>
-            <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+          <div>
+            <button
+              type="button"
+              onClick={() => setIsAuthOpen((prev) => !prev)}
+              className="w-full flex items-center justify-between px-3 py-2 text-xs font-medium text-slate-600 rounded-xl hover:bg-slate-50 hover:text-slate-900 transition-all cursor-pointer"
+            >
+              <div className="flex items-center gap-3">
+                <Lock className="w-4 h-4" />
+                <span>Authentication</span>
+              </div>
+              {isAuthOpen ? (
+                <ChevronDown className="w-3.5 h-3.5 text-[#5e35b1]" />
+              ) : (
+                <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+              )}
+            </button>
+
+            {isAuthOpen && (
+              <div className="pl-6 pt-1 space-y-0.5 border-l border-slate-100 ml-4">
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="w-full flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-rose-600 rounded-lg hover:bg-rose-50 transition-all cursor-pointer text-left"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span>Log Out</span>
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="w-full flex items-center justify-between px-3 py-2 text-xs font-medium text-slate-600 rounded-xl hover:bg-slate-50 cursor-pointer">

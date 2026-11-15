@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Menu,
   Search,
@@ -16,6 +16,7 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { ThemeConfig } from '../../types';
+import { useAuth } from '../../context/AuthContext';
 
 interface NavbarProps {
   themeConfig: ThemeConfig;
@@ -31,6 +32,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   searchValue = '',
   onSearchChange,
 }) => {
+  const navigate = useNavigate();
+  const { user, signOut } = useAuth();
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -248,10 +251,14 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* User Profile Area & Settings */}
           <div className="flex items-center gap-1.5 sm:gap-2 pl-1 sm:pl-2 relative" ref={profileRef}>
-            <div
+            <button
+              id="berry-profile-btn"
+              type="button"
               onClick={() => setShowProfileMenu(!showProfileMenu)}
               className="w-8 h-8 sm:w-9 sm:h-9 rounded-full overflow-hidden border-2 border-slate-100 shadow-xs cursor-pointer hover:ring-2 hover:ring-[#5e35b1]/30 transition-all"
               title="User Account"
+              aria-label="User Account"
+              aria-expanded={showProfileMenu}
             >
               <img
                 src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=80"
@@ -259,7 +266,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 className="w-full h-full object-cover"
                 referrerPolicy="no-referrer"
               />
-            </div>
+            </button>
 
             <button
               id="berry-header-settings-btn"
@@ -284,9 +291,9 @@ export const Navbar: React.FC<NavbarProps> = ({
                     />
                   </div>
                   <div>
-                    <h5 className="font-bold text-xs text-slate-800">John Doe</h5>
-                    <p className="text-[11px] text-[#5e35b1] font-semibold">Administrator</p>
-                    <p className="text-[10px] text-slate-400">john.doe@berry.io</p>
+                    <h5 className="font-bold text-xs text-slate-800">{user?.name || 'John Doe'}</h5>
+                    <p className="text-[11px] text-[#5e35b1] font-semibold">{user?.role || 'Administrator'}</p>
+                    <p className="text-[10px] text-slate-400">{user?.email || 'john.doe@berry.io'}</p>
                   </div>
                 </div>
 
@@ -313,7 +320,13 @@ export const Navbar: React.FC<NavbarProps> = ({
                   </button>
                   <div className="pt-2 border-t border-slate-100">
                     <button
-                      onClick={() => setShowProfileMenu(false)}
+                      id="berry-logout-btn"
+                      type="button"
+                      onClick={async () => {
+                        setShowProfileMenu(false);
+                        await signOut();
+                        navigate('/sign-in', { replace: true });
+                      }}
                       className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer text-left font-medium"
                     >
                       <LogOut className="w-4 h-4" />

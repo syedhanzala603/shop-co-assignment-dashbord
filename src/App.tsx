@@ -5,14 +5,27 @@ import { CustomerListPage } from './pages/CustomerListPage';
 import { OrderListPage } from './pages/OrderListPage';
 import { ProductsPage } from './pages/ProductsPage';
 import { ProductDetailsPage } from './pages/ProductDetailsPage';
+import { SignInPage } from './pages/SignInPage';
 import { ProductProvider } from './context/ProductContext';
+import { AuthProvider } from './context/AuthContext';
+import { ProtectedRoute, PublicOnlyRoute } from './components/auth/RouteGuards';
 
 export default function App() {
   return (
-    <ProductProvider>
-      <BrowserRouter>
+    <AuthProvider>
+      <ProductProvider>
+        <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Layout />}>
+          {/* Public-only authentication routes (redirect to dashboard if already signed in) */}
+          <Route element={<PublicOnlyRoute />}>
+            <Route path="/sign-in" element={<SignInPage />} />
+            <Route path="/login" element={<SignInPage />} />
+            <Route path="/authentication/sign-in" element={<SignInPage />} />
+          </Route>
+
+          {/* Protected dashboard routes (redirect unauthenticated users to /sign-in) */}
+          <Route element={<ProtectedRoute />}>
+            <Route path="/" element={<Layout />}>
             {/* Dashboard routes */}
             <Route index element={<DashboardPage />} />
             <Route path="dashboard" element={<DashboardPage />} />
@@ -39,9 +52,11 @@ export default function App() {
 
             {/* Fallback route */}
             <Route path="*" element={<Navigate to="/" replace />} />
+            </Route>
           </Route>
         </Routes>
       </BrowserRouter>
     </ProductProvider>
+    </AuthProvider>
   );
 }

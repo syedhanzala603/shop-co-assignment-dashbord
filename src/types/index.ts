@@ -64,3 +64,38 @@ export interface ProductItem {
   specifications?: { label: string; value: string }[];
   colors?: { name: string; hex: string }[];
 }
+
+export interface AuthUser {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  avatar?: string;
+}
+
+export interface AuthSession {
+  user: AuthUser;
+  token: string;
+  rememberMe: boolean;
+  isDemo: boolean;
+  authenticatedAt: string;
+}
+
+export interface SignInCredentials {
+  email: string;
+  password: string;
+  rememberMe: boolean;
+}
+
+export interface AuthResult {
+  success: boolean;
+  session?: AuthSession;
+  error?: string;
+}
+
+export interface PasswordResetResult {
+  success: boolean;
+  message?: string;
+  error?: string;
+}
+
